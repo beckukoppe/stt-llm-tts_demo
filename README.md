@@ -8,7 +8,7 @@ Enter:
 - `source venv/bin/activate`
 
 Install packages:
-- `pip install requests`
+- `pip install -r requirements.txt`
 
 Exit: 
 - `deactivate`
