@@ -15,9 +15,11 @@ if [ ! -d "venv" ]; then
 fi
 
 if [ -z "$VIRTUAL_ENV" ]; then
-  echo "Activating"
+  echo "Activating virtual environment..."
   source venv/bin/activate
   pip install -r requirements.txt
 fi
+
+clear
 
 python script.py

@@ -1,13 +1,14 @@
 import subprocess
 import threading
 import requests
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "1"
 import pygame
 import time
 import queue
 import itertools
 import sys
 import re
-import os
 
 # Configurations
 API_URL = "http://localhost:8081/v1/chat/completions"
