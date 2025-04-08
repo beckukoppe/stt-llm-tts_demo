@@ -1,0 +1,4 @@
+venv/
+output.wav
+recorded.wav*
+whisper.cpp/build/
