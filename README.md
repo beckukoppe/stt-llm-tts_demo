@@ -1,4 +1,4 @@
-# tts-llm-stt_demo
+# stt-llm-tts_demo
 
 ## Virtual Python Environment
 Create:
