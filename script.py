@@ -16,12 +16,20 @@ MODEL_NAME = "mistral-small-25b-2504-Q6_k_L"
 HEADERS = {"Content-Type": "application/json"}
 TTS_SERVER_URL = "http://localhost:5002/api/tts"
 TEMP_AUDIO_FILE = "recorded.wav"
+AUDIO_FOLDER = "audios"
+AUDIO_FILE = "audio"
+os.makedirs(AUDIO_FOLDER, exist_ok=True)
 
 messages = [
     {"role": "system", "content": "You are a helpful and friendly AI assistant. You are not allowed to use emojis, or any symbols exept '.'"}
 ]
 
 is_processing = False
+audio_counter = 0
+
+pygame.init()
+pygame.mixer.init()
+pygame.mixer.music.set_endevent(pygame.USEREVENT)
 
 
 def animate_dots(message="Processing"):
@@ -110,23 +118,68 @@ def run_pipeline():
             clean_reply = reply.replace("\n", " ").replace("\r", "")
             print(f"\nAI: {clean_reply}")
 
-            # TTS
-            tts_headers = {"text": clean_reply, "style_wav": "{rate: 4}"}
-            tts_response = requests.post(TTS_SERVER_URL, headers=tts_headers)
-
-            if tts_response.status_code == 200:
-                with open("output.wav", "wb") as f:
-                    f.write(tts_response.content)
-                play_audio("output.wav")
-            else:
-                print(f"TTS Error: {tts_response.status_code} - {tts_response.text}")
-
-            messages.append({"role": "assistant", "content": clean_reply})
-
+            tts(clean_reply)
+            
         except Exception as e:
             print(f"Error: {e}")
         finally:
             is_processing = False
+
+def call_coqui(text, i):
+    tts_headers = {"text": text}
+    tts_response = requests.post(TTS_SERVER_URL, headers=tts_headers)
+
+    if tts_response.status_code == 200:
+        path = os.path.join(AUDIO_FOLDER, f"{AUDIO_FILE}{i}.wav")
+        with open(path, "wb") as f:
+            f.write(tts_response.content)
+    else:
+        print(f"TTS Error: {tts_response.status_code} - {tts_response.text}")
+    
+
+def generateSentences(sentences):
+    for index, sentence in enumerate(sentences):
+        call_coqui(sentence,index + 1)
+
+def play(file):
+    path = os.path.join(AUDIO_FOLDER, f"{file}.wav")
+    pygame.mixer.music.load(path)
+    pygame.mixer.music.play()
+
+def audio_event_loop(length):
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.USEREVENT:
+                os.remove(os.path.join(AUDIO_FOLDER, f"{AUDIO_FILE}{audio_counter}.wav"))
+                x = on_audio_end(length)
+                if x :
+                    return
+        time.sleep(0.1)
+
+def on_audio_end(length):
+    global audio_counter
+    audio_counter += 1
+    if(audio_counter == length):
+        return True
+    
+    while(True):
+        if os.path.exists(os.path.join(AUDIO_FOLDER, f"{AUDIO_FILE}{audio_counter}.wav")):
+            break
+    
+    play(AUDIO_FILE + str(audio_counter))
+    return False
+
+def tts(input):
+    sentences = re.split(r'(?<=[.!?])\s+', input)
+    length = len(sentences)
+    global audio_counter
+    audio_counter = 0
+    call_coqui(sentences.pop(0), 0)
+    play(AUDIO_FILE + str(0))
+    t = threading.Thread(target=generateSentences, args=(sentences,), daemon=True)
+    t.start()
+    audio_event_loop(length)
+
 
 
 # Start the main loop

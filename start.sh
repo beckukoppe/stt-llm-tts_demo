@@ -1,3 +1,9 @@
+
+if [ -d "audios/" ]; then
+  echo "Removing audios..."
+  rm -rf 'audios/'
+fi
+
 # --- whisper.cpp build ---
 if [ ! -d "whisper.cpp/build" ]; then
   echo "Building whisper.cpp with Vulkan support..."
@@ -7,6 +13,9 @@ if [ ! -d "whisper.cpp/build" ]; then
   cd ..
 fi
 
+if [ ! -f "whisper.cpp/models/ggml-base.en.bin" ]; then
+  ./whisper.cpp/models/download-ggml-model.sh base.en
+fi
 
 # --- Virtual environment setup ---
 if [ ! -d "venv" ]; then
@@ -23,3 +32,8 @@ fi
 clear
 
 python script.py
+
+
+
+
+
