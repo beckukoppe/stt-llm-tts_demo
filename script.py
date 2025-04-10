@@ -9,6 +9,7 @@ import queue
 import itertools
 import sys
 import re
+import random
 
 # Configurations
 API_URL = "http://localhost:8081/v1/chat/completions"
@@ -19,6 +20,9 @@ TEMP_AUDIO_FILE = "recorded.wav"
 AUDIO_FOLDER = "audios"
 AUDIO_FILE = "audio"
 os.makedirs(AUDIO_FOLDER, exist_ok=True)
+
+speakers = ['Claribel Dervla', 'Daisy Studious', 'Gracie Wise', 'Tammie Ema', 'Alison Dietlinde', 'Ana Florence', 'Annmarie Nele', 'Asya Anara', 'Brenda Stern', 'Gitta Nikolina', 'Henriette Usha', 'Sofia Hellen', 'Tammy Grit', 'Tanja Adelina', 'Vjollca Johnnie', 'Andrew Chipper', 'Badr Odhiambo', 'Dionisio Schuyler', 'Royston Min', 'Viktor Eka', 'Abrahan Mack', 'Adde Michal', 'Baldur Sanjin', 'Craig Gutsy', 'Damien Black', 'Gilberto Mathias', 'Ilkin Urbano', 'Kazuhiko Atallah', 'Ludvig Milivoj', 'Suad Qasim', 'Torcull Diarmuid', 'Viktor Menelaos', 'Zacharie Aimilios', 'Nova Hogarth', 'Maja Ruoho', 'Uta Obando', 'Lidiya Szekeres', 'Chandra MacFarland', 'Szofi Granger', 'Camilla Holmström', 'Lilya Stainthorpe', 'Zofija Kendrick', 'Narelle Moon', 'Barbora MacLean', 'Alexandra Hisakawa', 'Alma María', 'Rosemary Okafor', 'Ige Behringer', 'Filip Traverse', 'Damjan Chapman', 'Wulf Carlevaro', 'Aaron Dreschner', 'Kumar Dahl', 'Eugenio Mataracı', 'Ferran Simen', 'Xavier Hayasaka', 'Luis Moray', 'Marcos Rudaski']
+speaker = random.choice(speakers)
 
 messages = [
     {"role": "system", "content": "You are a helpful and friendly AI assistant. You are not allowed to use emojis, or any symbols exept '.'"}
@@ -126,7 +130,7 @@ def run_pipeline():
             is_processing = False
 
 def call_coqui(text, i):
-    tts_headers = {"text": text}
+    tts_headers = {"text": text, "speaker-id": speaker, "language-id": "en"}
     tts_response = requests.post(TTS_SERVER_URL, headers=tts_headers)
 
     if tts_response.status_code == 200:
@@ -162,9 +166,8 @@ def on_audio_end(length):
     if(audio_counter == length):
         return True
     
-    while(True):
-        if os.path.exists(os.path.join(AUDIO_FOLDER, f"{AUDIO_FILE}{audio_counter}.wav")):
-            break
+    while not os.path.exists(os.path.join(AUDIO_FOLDER, f"{AUDIO_FILE}{audio_counter}.wav")):
+        time.sleep(0.1)
     
     play(AUDIO_FILE + str(audio_counter))
     return False
