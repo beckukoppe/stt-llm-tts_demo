@@ -34,6 +34,13 @@ Exit:
 
 ## xtts
 
+docker run --rm -it -p 5002:5002 --gpus all --entrypoint /bin/bash ghcr.io/coqui-ai/tts
+
+--use_cuda true
+
+
+
+tts --model_name tts_models/multilingual/multi-dataset/xtts_v2 --list_speaker
 
 python3 TTS/server/server.py --model_name tts_models/multilingual/multi-dataset/xtts_v2 --config_path /root/.local/share/tts/tts_models--multilingual--multi-dataset--xtts_v2/config.json --model_path /root/.local/share/tts/tts_models--multilingual--multi-dataset--xtts_v2/
 
